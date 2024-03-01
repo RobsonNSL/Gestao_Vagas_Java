@@ -9,3 +9,4 @@ Para criar esse projeto foram utilizados:
 - Postgres
 - Insonmia
 - Postbird
+- Maven
