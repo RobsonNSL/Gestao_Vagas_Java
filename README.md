@@ -10,3 +10,4 @@ Para criar esse projeto foram utilizados:
 - Insonmia
 - Postbird
 - Maven
+- JWT
