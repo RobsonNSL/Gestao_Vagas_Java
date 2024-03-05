@@ -19,8 +19,10 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
 
-        System.out.println(header);
-        
+        if(header != null) {
+            
+        }
+
         filterChain.doFilter(request, response);
     }
 
