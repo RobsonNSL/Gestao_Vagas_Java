@@ -10,7 +10,7 @@ public class JWTProvider {
     public String validateToken(String token) {
         token = token.replace("Bearer", "");
 
-        JWT.require(null)
+        //JWT.require(null)
     }
     
 }
