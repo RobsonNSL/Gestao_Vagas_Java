@@ -22,43 +22,43 @@ import br.com.robsonleandronsl.gestao_vagas.modules.candidate.dto.AuthCandidateR
 @Service
 public class AuthCandidateUseCase {
 
-    @Value("${security.token.secret.candidate}")
-    private String secretKey;
+        @Value("${security.token.secret.candidate}")
+        private String secretKey;
 
-    @Autowired
-    private CandidateRepository candidateRepository;
+        @Autowired
+        private CandidateRepository candidateRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+        @Autowired
+        private PasswordEncoder passwordEncoder;
 
-    public AuthCandidateResponseDTO execute(AuthCandidateRequestDTO AuthCandidateRequestDTO)
-            throws AuthenticationException {
-        var candidate = this.candidateRepository.findByUsername(AuthCandidateRequestDTO.username())
-                .orElseThrow(() -> {
-                    throw new UsernameNotFoundException("Username/ Password Incorrect");
-                });
+        public AuthCandidateResponseDTO execute(AuthCandidateRequestDTO AuthCandidateRequestDTO)
+                        throws AuthenticationException {
+                var candidate = this.candidateRepository.findByUsername(AuthCandidateRequestDTO.username())
+                                .orElseThrow(() -> {
+                                        throw new UsernameNotFoundException("Username/ Password Incorrect");
+                                });
 
-        var passwordMatches = this.passwordEncoder
-                .matches(AuthCandidateRequestDTO.password(), candidate.getPassword());
+                var passwordMatches = this.passwordEncoder
+                                .matches(AuthCandidateRequestDTO.password(), candidate.getPassword());
 
-        if (!passwordMatches) {
-            throw new AuthenticationException();
+                if (!passwordMatches) {
+                        throw new AuthenticationException();
+                }
+
+                Algorithm algorithm = Algorithm.HMAC256(secretKey);
+                var expiresIn = Instant.now().plus(Duration.ofMinutes(10));
+                var token = JWT.create()
+                                .withIssuer("java_company")
+                                .withSubject(candidate.getId().toString())
+                                .withClaim("roles", Arrays.asList("CANDIDATE"))
+                                .withExpiresAt(expiresIn)
+                                .sign(algorithm);
+
+                var authCandidateResponseDTO = AuthCandidateResponseDTO.builder()
+                                .access_token(token)
+                                .expires_in(expiresIn.toEpochMilli())
+                                .build();
+
+                return authCandidateResponseDTO;
         }
-
-        Algorithm algorithm = Algorithm.HMAC256(secretKey);
-        var expiresIn = Instant.now().plus(Duration.ofMinutes(10));
-        var token = JWT.create()
-                .withIssuer("java_company")
-                .withSubject(candidate.getId().toString())
-                .withClaim("roles", Arrays.asList("candidate"))
-                .withExpiresAt(expiresIn)
-                .sign(algorithm);
-
-        var authCandidateResponseDTO = AuthCandidateResponseDTO.builder()
-                .access_token(token)
-                .expires_in(expiresIn.toEpochMilli())
-                .build();
-
-        return authCandidateResponseDTO;
-    }
 }
